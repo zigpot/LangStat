@@ -6,6 +6,13 @@ Statistics of language usage of a Github user.
 
 [] Handle Python error, use try catch
 [] Handle response error
+[] Take argument input: input file name.
+[] Take flags:
+[] 	--include-forks to include repos forked from elsewhere
+[] 	--group-minority=BOOLEAN, to group smallest languages as a single one, default TRUE
+[] 	--help
+[] Make bar chart
+[] Represent as percentage
 
 ### In Progress
 

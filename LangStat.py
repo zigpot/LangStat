@@ -4,18 +4,16 @@
 import requests
 import matplotlib.pyplot as plt
 import random
+import argparse
+import json
+import sys
+
+def getRandomColor():
+    color = "#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+    return color
 
 def getGithubUserRepos( uname ):
     return f'https://api.github.com/users/{uname}/repos'
-
-
-myUsername = "zigpot"
-myGithubUserRepoRequest = getGithubUserRepos(myUsername)
-
-
-# TODO: Overcome low rate limit using authentication, ref: https://docs.github.com/en/apps/creating-github-apps/creating-github-apps/rate-limits-for-github-apps
-response = requests.get(myGithubUserRepoRequest)
-
 
 # TODO: Handle response error (using try catch)
 def getLangsStat(response, ignoreForks=True):
@@ -39,48 +37,36 @@ def getLangsStat(response, ignoreForks=True):
         print(response.reason)
     return langs
 
+def main(argv):
+    print (argv)
+    myGithubUserRepoRequest = getGithubUserRepos(argv[1])
+    response = requests.get(myGithubUserRepoRequest)
+    langs = getLangsStat(response, ignoreForks=False)
+    sortedLangsRev = dict(sorted(langs.items(), key = lambda x: x[1], reverse=True))
+    print(sortedLangsRev)
 
-langs = getLangsStat(response, ignoreForks=False)
+    f = open('colors.json')
 
-sortedLangsRev = dict(sorted(langs.items(), key = lambda x: x[1], reverse=True))
-
-
-langs
-
-
-print(sortedLangsRev)
-
-
-import json
-
-# https://raw.githubusercontent.com/ozh/github-colors/master/colors.json
-f = open('colors.json')
-
-githubLangColors = json.load(f)
+    githubLangColors = json.load(f)
 
 
-def getRandomColor():
-    color = "#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
-    return color
 
+    langsLabels = list(sortedLangsRev.keys())
+    langsValues = list(sortedLangsRev.values())
+    langsColors = []
+    for lang in langsLabels:
+        color = ''
+        if lang in githubLangColors:
+            color =githubLangColors[lang]['color']
+            #print(f'{lang} {color}')
+        else:
+            color = langsColors.append(getRandomColor())
+            #print(f'{lang} {color} (color not found, randomly assigned)')
+        langsColors.append(color)
+        
+    patches, text = plt.pie(langsValues, labels=langsLabels, radius=3.3, colors=langsColors)
+    plt.legend(patches, langsLabels, loc="best")
+    plt.show()
 
-langsLabels = list(sortedLangsRev.keys())
-langsValues = list(sortedLangsRev.values())
-langsColors = []
-for lang in langsLabels:
-    color = ''
-    if lang in githubLangColors:
-        color =githubLangColors[lang]['color']
-        #print(f'{lang} {color}')
-    else:
-        color = langsColors.append(getRandomColor())
-        #print(f'{lang} {color} (color not found, randomly assigned)')
-    langsColors.append(color)
-    
-patches, text = plt.pie(langsValues, labels=langsLabels, radius=3.3, colors=langsColors)
-plt.legend(patches, langsLabels, loc="best")
-plt.show()
-
-
-langsLabels[5]
-
+if __name__ == "__main__":
+	main(sys.argv[1:])
