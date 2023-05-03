@@ -1,2 +1,5 @@
 .ipynb_checkpoints
+output
+__pycache__
+*.pyc
 LangStat.ipynb
